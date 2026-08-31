@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>BHU SGPA Calculator with Database</title>
+    <title>BHU SGPA Calculator with Abhinav Sahu</title>
     <style>
         body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; flex-direction: column; align-items: center; padding: 20px; }
         .box { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 100%; max-width: 400px; margin-bottom: 20px; position: relative; }
@@ -39,6 +39,7 @@
 
     <h2>BANARAS HINDU UNIVERSITY</h2>
     <h3>Semester Grade Calculation</h3>
+    <p style="text-align: center; font-size: 12px; color: #777; margin-top: -2px;">Calculated by Abhinav Sahu</p>
     <hr>
 
     <label style="color: #b78103;">Enter Your Name:</label> 
@@ -106,7 +107,6 @@ function calculateSGPA() {
     localStorage.setItem('sgpaHistory', JSON.stringify(history));
     displayHistory();
 
-    // गूगल शीट का यूआरएल यहाँ जोड़ा गया है
     let webAppUrl = "https://script.google.com/macros/s/AKfycby3OrR5iQITRagSIF15iFDGxM43gn6fiPcohDX5gy6nJdI-jt1HS8jURWWRw8exq-n9sg/exec";
     
     let payload = { name: name, major: major, minor: minor, minorlab: minorlab, sec: sec, md: md, aec: aec, evs: evs, ayu: ayu, sgpa: sgpa };
@@ -132,3 +132,4 @@ function clearHistory(event) { event.stopPropagation(); document.getElementById(
 </script>
 </body>
 </html>
+
