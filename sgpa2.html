@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>BHU SGPA Calculator with Database</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .box { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 100%; max-width: 400px; margin-bottom: 20px; position: relative; }
+        h2, h3 { text-align: center; color: #333; margin-bottom: 5px; }
+        label { display: block; margin-top: 12px; font-weight: bold; color: #555; }
+        input { width: 95%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; }
+        .name-input { background-color: #fffde7; border: 1px solid #fbc02d; }
+        button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 20px; }
+        button:hover { background-color: #0056b3; }
+        #result { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: center; color: #28a745; background-color: #e9f7ef; padding: 10px; border-radius: 5px; display: none; }
+        
+        .menu-container { position: absolute; top: 15px; right: 15px; cursor: pointer; }
+        .three-dots { font-size: 24px; color: #666; font-weight: bold; padding: 5px; }
+        .dropdown-menu { display: none; position: absolute; top: 35px; right: 0; background-color: white; min-width: 140px; box-shadow: 0px 4px 8px rgba(0,0,0,0.2); border-radius: 4px; z-index: 1; border: 1px solid #ddd; overflow: hidden; }
+        .dropdown-menu div { padding: 10px; text-align: left; font-size: 14px; font-weight: bold; color: #333; cursor: pointer; }
+        .dropdown-menu div:hover { background-color: #f8f9fa; }
+        
+        .history-box { display: none; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; font-size: 14px; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <div class="menu-container" onclick="toggleMenu(event)">
+        <div class="three-dots">⋮</div>
+        <div class="dropdown-menu" id="myDropdown">
+            <div onclick="toggleHistoryTable(event)">📋 Show Local History</div>
+            <div style="color: #dc3545;" onclick="clearHistory(event)">❌ Clear Local History</div>
+        </div>
+    </div>
+
+    <h2>BANARAS HINDU UNIVERSITY</h2>
+    <h3>Semester Grade Calculation</h3>
+    <hr>
+
+    <label style="color: #b78103;">Enter Your Name:</label> 
+    <input type="text" id="userName" class="name-input" placeholder="आपका नाम यहाँ लिखें" required>
+
+    <label>Major Marks:</label> <input type="number" id="major" value="0">
+    <label>Minor Marks:</label> <input type="number" id="minor" value="0">
+    <label>Minor Lab Marks:</label> <input type="number" id="minorlab" value="0">
+    <label>SEC Marks:</label> <input type="number" id="sec" value="0">
+    <label>MD Marks:</label> <input type="number" id="md" value="0">
+    <label>AEC Marks:</label> <input type="number" id="aec" value="0">
+    <label>EVS Marks:</label> <input type="number" id="evs" value="0">
+    <label>Ayurveda Marks:</label> <input type="number" id="ayu" value="0">
+
+    <button onclick="calculateSGPA()">Generate Result</button>
+
+    <div id="result"></div>
+</div>
+
+<div class="history-box" id="historyBox">
+    <h3>Your Past Calculations (This Device)</h3>
+    <table>
+        <thead>
+            <tr><th>No.</th><th>Marks (Maj/Min/Lab/SEC/MD/AEC/EVS/Ayu)</th><th>SGPA</th></tr>
+        </thead>
+        <tbody id="history-rows"></tbody>
+    </table>
+</div>
+
+<script>
+window.onload = function() { displayHistory(); };
+
+function toggleMenu(event) { event.stopPropagation(); let d = document.getElementById("myDropdown"); d.style.display = (d.style.display === "block") ? "none" : "block"; }
+window.onclick = function() { document.getElementById("myDropdown").style.display = "none"; }
+function toggleHistoryTable(event) { event.stopPropagation(); document.getElementById("myDropdown").style.display = "none"; let b = document.getElementById("historyBox"); b.style.display = (b.style.display === "block") ? "none" : "block"; }
+
+function getGradePoint(marks) {
+    if (marks >= 90) return 10; else if (marks >= 80) return 9; else if (marks >= 70) return 8; else if (marks >= 60) return 7; else if (marks >= 50) return 6; else if (marks >= 40) return 5; else return 0;
+}
+
+function calculateSGPA() {
+    let name = document.getElementById('userName').value.trim();
+    if(!name) { alert("कृपया पहले अपना नाम दर्ज करें!"); return; }
+
+    let major = parseFloat(document.getElementById('major').value) || 0;
+    let minor = parseFloat(document.getElementById('minor').value) || 0;
+    let minorlab = parseFloat(document.getElementById('minorlab').value) || 0;
+    let sec = parseFloat(document.getElementById('sec').value) || 0;
+    let md = parseFloat(document.getElementById('md').value) || 0;
+    let aec = parseFloat(document.getElementById('aec').value) || 0;
+    let evs = parseFloat(document.getElementById('evs').value) || 0;
+    let ayu = parseFloat(document.getElementById('ayu').value) || 0;
+
+    let total_credits = 4.0 + 3.0 + 1.0 + 2.0 + 3.0 + 2.0 + 2.0 + 2.0;
+    let total_earned_points = (getGradePoint(major)*4) + (getGradePoint(minor)*3) + (getGradePoint(minorlab)*1) + (getGradePoint(sec)*2) + (getGradePoint(md)*3) + (getGradePoint(aec)*2) + (getGradePoint(evs)*2) + (getGradePoint(ayu)*2);
+
+    let sgpa = (total_earned_points / total_credits).toFixed(2);
+
+    document.getElementById('result').style.display = "block";
+    document.getElementById('result').innerHTML = "Your Final SGPA is: " + sgpa;
+
+    let newRecord = { marksStr: `${major}/${minor}/${minorlab}/${sec}/${md}/${aec}/${evs}/${ayu}`, finalSgpa: sgpa };
+    let history = JSON.parse(localStorage.getItem('sgpaHistory')) || [];
+    history.push(newRecord);
+    localStorage.setItem('sgpaHistory', JSON.stringify(history));
+    displayHistory();
+
+    // गूगल शीट का यूआरएल यहाँ जोड़ा गया है
+    let webAppUrl = "https://script.google.com/macros/s/AKfycby3OrR5iQITRagSIF15iFDGxM43gn6fiPcohDX5gy6nJdI-jt1HS8jURWWRw8exq-n9sg/exec";
+    
+    let payload = { name: name, major: major, minor: minor, minorlab: minorlab, sec: sec, md: md, aec: aec, evs: evs, ayu: ayu, sgpa: sgpa };
+
+    fetch(webAppUrl, {
+        method: "POST",
+        mode: "no-cors",
+        cache: "no-cache",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    }).then(() => { console.log("Data successfully sent to Google Sheet!"); })
+      .catch((error) => { console.error("Error sending data:", error); });
+}
+
+function displayHistory() {
+    let history = JSON.parse(localStorage.getItem('sgpaHistory')) || [];
+    let rowsHtml = "";
+    history.forEach((item, index) => { rowsHtml += `<tr><td>${index + 1}</td><td>${item.marksStr}</td><td style="font-weight:bold; color:#28a745;">${item.finalSgpa}</td></tr>`; });
+    document.getElementById('history-rows').innerHTML = rowsHtml;
+}
+
+function clearHistory(event) { event.stopPropagation(); document.getElementById("myDropdown").style.display = "none"; if(confirm("स्थानीय हिस्ट्री डिलीट करें?")) { localStorage.removeItem('sgpaHistory'); displayHistory(); document.getElementById("historyBox").style.display = "none"; } }
+</script>
+</body>
+</html>
