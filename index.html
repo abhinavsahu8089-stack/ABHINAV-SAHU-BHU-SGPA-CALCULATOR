@@ -101,7 +101,7 @@ function calculateSGPA() {
     let ayu = parseFloat(document.getElementById('ayu').value) || 0;
 
     let total_credits = 4.0 + 3.0 + 1.0 + 3.0 + 3.0 + 2.0 + 2.0 + 2.0;
-    let total_earned_points = (getGradePoint(major)*4) + (getGradePoint(minor)*3) + (getGradePoint(minorlab)*1) + (getGradePoint(sec)*2) + (getGradePoint(md)*3) + (getGradePoint(aec)*2) + (getGradePoint(evs)*2) + (getGradePoint(ayu)*2);
+    let total_earned_points = (getGradePoint(major)*4) + (getGradePoint(minor)*3) + (getGradePoint(minorlab)*1) + (getGradePoint(sec)*3) + (getGradePoint(md)*3) + (getGradePoint(aec)*2) + (getGradePoint(evs)*2) + (getGradePoint(ayu)*2);
 
     let sgpa = (total_earned_points / total_credits).toFixed(2);
 
