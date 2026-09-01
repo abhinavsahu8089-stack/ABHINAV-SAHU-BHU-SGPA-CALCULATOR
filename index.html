@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BHU SGPA Calculator with Abhinav Sahu</title>
 
-    <!-- WhatsApp & Social Media Preview Meta Tags -->
     <meta property="og:title" content="BHU SGPA Calculator with Abhinav Sahu" />
     <meta property="og:description" content="Banaras Hindu University ke Semester SGPA calculate karein aur apna result dekhein." />
     <meta property="og:type" content="website" />
@@ -19,7 +18,7 @@
         .name-input { background-color: #fffde7; border: 1px solid #fbc02d; }
         button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 20px; }
         button:hover { background-color: #0056b3; }
-        #result { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: center; color: #28a745; background-color: #e9f7ef; padding: 10px; border-radius: 5px; display: none; }
+        #result { margin-top: 20px; font-size: 20px; font-weight: bold; text-align: center; padding: 10px; border-radius: 5px; display: none; }
         
         .menu-container { position: absolute; top: 15px; right: 15px; cursor: pointer; }
         .three-dots { font-size: 24px; color: #666; font-weight: bold; padding: 5px; }
@@ -83,49 +82,104 @@ function toggleMenu(event) { event.stopPropagation(); let d = document.getElemen
 window.onclick = function() { document.getElementById("myDropdown").style.display = "none"; }
 function toggleHistoryTable(event) { event.stopPropagation(); document.getElementById("myDropdown").style.display = "none"; let b = document.getElementById("historyBox"); b.style.display = (b.style.display === "block") ? "none" : "block"; }
 
+// 40 से कम अंक पर भी 0 न करके ग्रेड पॉइंट जोड़ने वाला नया फंक्शन
 function getGradePoint(marks) {
-    if (marks >= 90) return 10; else if (marks >= 80) return 9; else if (marks >= 70) return 8; else if (marks >= 60) return 7; else if (marks >= 50) return 6; else if (marks >= 40) return 5; else return 0;
+    if (marks >= 90) return 10;
+    else if (marks >= 80) return 9;
+    else if (marks >= 70) return 8;
+    else if (marks >= 60) return 7;
+    else if (marks >= 50) return 6;
+    else if (marks >= 40) return 5;
+    else if (marks >= 30) return 4;
+    else if (marks >= 20) return 3; // जैसे 25 अंक पर ग्रेड पॉइंट 3 मिलेगा
+    else if (marks >= 10) return 2;
+    else return 1;
 }
 
 function calculateSGPA() {
     let name = document.getElementById('userName').value.trim();
     if(!name) { alert("कृपया पहले अपना नाम दर्ज करें!"); return; }
 
-    let major = parseFloat(document.getElementById('major').value) || 0;
-    let minor = parseFloat(document.getElementById('minor').value) || 0;
-    let minorlab = parseFloat(document.getElementById('minorlab').value) || 0;
-    let sec = parseFloat(document.getElementById('sec').value) || 0;
-    let md = parseFloat(document.getElementById('md').value) || 0;
-    let aec = parseFloat(document.getElementById('aec').value) || 0;
-    let evs = parseFloat(document.getElementById('evs').value) || 0;
-    let ayu = parseFloat(document.getElementById('ayu').value) || 0;
+    let subjects = [
+        { name: "Major", marks: parseFloat(document.getElementById('major').value) || 0, credit: 4.0 },
+        { name: "Minor", marks: parseFloat(document.getElementById('minor').value) || 0, credit: 3.0 },
+        { name: "Minor Lab", marks: parseFloat(document.getElementById('minorlab').value) || 0, credit: 1.0 },
+        { name: "SEC", marks: parseFloat(document.getElementById('sec').value) || 0, credit: 3.0 },
+        { name: "MD", marks: parseFloat(document.getElementById('md').value) || 0, credit: 3.0 },
+        { name: "AEC", marks: parseFloat(document.getElementById('aec').value) || 0, credit: 2.0 },
+        { name: "EVS", marks: parseFloat(document.getElementById('evs').value) || 0, credit: 2.0 },
+        { name: "Ayurveda", marks: parseFloat(document.getElementById('ayu').value) || 0, credit: 2.0 }
+    ];
 
-    let total_credits = 4.0 + 3.0 + 1.0 + 3.0 + 3.0 + 2.0 + 2.0 + 2.0;
-    let total_earned_points = (getGradePoint(major)*4) + (getGradePoint(minor)*3) + (getGradePoint(minorlab)*1) + (getGradePoint(sec)*3) + (getGradePoint(md)*3) + (getGradePoint(aec)*2) + (getGradePoint(evs)*2) + (getGradePoint(ayu)*2);
+    let total_credits = 0;
+    let total_earned_points = 0;
+    let failedSubjects = [];
+
+    subjects.forEach(sub => {
+        let gp = getGradePoint(sub.marks);
+        total_credits += sub.credit;
+        total_earned_points += (gp * sub.credit);
+
+        // 40 से कम अंक होने पर अलर्ट के लिए फ़ेल सूची में जोड़ना
+        if (sub.marks < 40) {
+            failedSubjects.push(`${sub.name} (${sub.marks} marks - Grade Point: ${gp})`);
+        }
+    });
 
     let sgpa = (total_earned_points / total_credits).toFixed(2);
+    let resultDiv = document.getElementById('result');
+    resultDiv.style.display = "block";
 
-    document.getElementById('result').style.display = "block";
-    document.getElementById('result').innerHTML = "Your Final SGPA is: " + sgpa;
+    // 40 से कम अंक होने पर अलर्ट दिखाना
+    if (failedSubjects.length > 0) {
+        alert("⚠️ Warning / बैक अलर्ट:\n\nआप निम्न विषयों में अनुत्तीर्ण (Fail) हैं:\n• " + failedSubjects.join("\n• "));
+        resultDiv.style.backgroundColor = "#f8d7da";
+        resultDiv.style.color = "#721c24";
+        resultDiv.innerHTML = "Your Final SGPA is: " + sgpa + " (With Back)";
+    } else {
+        resultDiv.style.backgroundColor = "#e9f7ef";
+        resultDiv.style.color = "#28a745";
+        resultDiv.innerHTML = "Your Final SGPA is: " + sgpa;
+    }
 
-    let newRecord = { marksStr: `${major}/${minor}/${minorlab}/${sec}/${md}/${aec}/${evs}/${ayu}`, finalSgpa: sgpa };
+    let marksStr = subjects.map(s => s.marks).join('/');
+    let newRecord = { marksStr: marksStr, finalSgpa: sgpa };
     let history = JSON.parse(localStorage.getItem('sgpaHistory')) || [];
     history.push(newRecord);
     localStorage.setItem('sgpaHistory', JSON.stringify(history));
     displayHistory();
 
     let webAppUrl = "https://script.google.com/macros/s/AKfycby3OrR5iQITRagSIF15iFDGxM43gn6fiPcohDX5gy6nJdI-jt1HS8jURWWRw8exq-n9sg/exec";
-    
-    let payload = { name: name, major: major, minor: minor, minorlab: minorlab, sec: sec, md: md, aec: aec, evs: evs, ayu: ayu, sgpa: sgpa };
+    let payload = { 
+        name: name, 
+        major: subjects[0].marks, 
+        minor: subjects[1].marks, 
+        minorlab: subjects[2].marks, 
+        sec: subjects[3].marks, 
+        md: subjects[4].marks, 
+        aec: subjects[5].marks, 
+        evs: subjects[6].marks, 
+        ayu: subjects[7].marks, 
+        sgpa: sgpa 
+    };
 
-    fetch(webAppUrl, {
-        method: "POST",
-        mode: "no-cors",
-        cache: "no-cache",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-    }).then(() => { console.log("Data successfully sent to Google Sheet!"); })
-      .catch((error) => { console.error("Error sending data:", error); });
+    function sendToSheet(data, attemptsLeft = 3) {
+        fetch(webAppUrl, {
+            method: "POST",
+            mode: "no-cors",
+            cache: "no-cache",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        }).then(() => {
+            console.log("Data successfully sent to Sheet!");
+        }).catch((err) => {
+            if (attemptsLeft > 1) {
+                setTimeout(() => sendToSheet(data, attemptsLeft - 1), 4000);
+            }
+        });
+    }
+
+    sendToSheet(payload);
 }
 
 function displayHistory() {
@@ -139,4 +193,5 @@ function clearHistory(event) { event.stopPropagation(); document.getElementById(
 </script>
 </body>
 </html>
+
 
